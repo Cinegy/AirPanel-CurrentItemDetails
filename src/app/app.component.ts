@@ -16,7 +16,6 @@ export class AppComponent {
   constructor(private zone: NgZone) {
     window['angularComponentRef'] = {
       zone: this.zone,
-      sayHello: () => this.sayHello(),
       selectedItemUpdated: () => this.selectedItemUpdated(),
       app: () => this,
       component: this
@@ -39,10 +38,12 @@ export class AppComponent {
   public playItem(item: McrItem): boolean {
     // let wang = window.external['Numberwang'];
     // item.Name = `C# apps say numberwang is: ${wang}`;
+
     const test: TestClass =  window['testObject'];
     this.currentMcrItem.Name = test.prop1;
     const result = test.method1(this.currentMcrItem.Name);
     alert(`Count: ${result}`);
+
     return false;
   }
 
