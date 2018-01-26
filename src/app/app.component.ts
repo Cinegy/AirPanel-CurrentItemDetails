@@ -1,4 +1,5 @@
-import { Component } from '@angular/core';
+import { TestClass } from './models/test-class';
+import { Component, NgZone } from '@angular/core';
 import { McrItem } from './models/mcritem';
 
 @Component({
@@ -12,38 +13,46 @@ export class AppComponent {
 
   public currentMcrItem: McrItem;
 
-  constructor() {
+  constructor(private zone: NgZone) {
+    window['angularComponentRef'] = {
+      zone: this.zone,
+      sayHello: () => this.sayHello(),
+      selectedItemUpdated: () => this.selectedItemUpdated(),
+      app: () => this,
+      component: this
+    };
+
     this.currentMcrItem = new McrItem();
-    
-    this.currentMcrItem.Name = "Item Name";
-    this.currentMcrItem.Comment = "Item Default Comment";
 
-    if(this.currentMcrItem.Name == "jjj")
-    {
-      this.SelectedItemUpdated();
+    this.currentMcrItem.Name = 'Item Name';
+    this.currentMcrItem.Comment = 'Item Default Comment';
+
+    if (this.currentMcrItem.Name === 'jjj') {
+      this.selectedItemUpdated();
     }
-
   }
 
-  
-
-  public SelectedItemUpdated() : void
-  {
-    this.currentMcrItem.Name = "Fired!";
+  public selectedItemUpdated(): void {
+    this.currentMcrItem.Name = 'Fired!';
   }
-  
-  public playItem(item:McrItem) : boolean
-  {
-    var wang = window.external["Numberwang"];
-    item.Name = `C# apps say numberwang is: ${wang}`;
-    
+
+  public playItem(item: McrItem): boolean {
+    // let wang = window.external['Numberwang'];
+    // item.Name = `C# apps say numberwang is: ${wang}`;
+    const test: TestClass =  window['testObject'];
+    this.currentMcrItem.Name = test.prop1;
+    const result = test.method1(this.currentMcrItem.Name);
+    alert(`Count: ${result}`);
     return false;
   }
 
-  public clearItem(item:McrItem) : boolean
-  {
-    window.external["Test"]("Current item name: " + item.Name);
-    
+  public clearItem(item: McrItem): boolean {
+    window.external['Test']('Current item name: ' + item.Name);
+
     return false;
+  }
+
+  public sayHello() {
+    alert('Hello from Angular');
   }
 }
