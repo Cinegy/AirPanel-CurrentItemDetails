@@ -1,6 +1,7 @@
 import { TestClass } from './models/test-class';
 import { Component, NgZone } from '@angular/core';
 import { McrItem } from './models/mcritem';
+import { promise } from 'selenium-webdriver';
 
 @Component({
   selector: 'app-root',
@@ -12,6 +13,8 @@ export class AppComponent {
   title = 'The Air Panel Demo';
 
   public currentMcrItem: McrItem;
+  public cuedMcrItem: McrItem;
+  public selectedMcrItem: McrItem;
 
   constructor(private zone: NgZone) {
     window['angularComponentRef'] = {
@@ -22,38 +25,32 @@ export class AppComponent {
     };
 
     this.currentMcrItem = new McrItem();
+    this.cuedMcrItem = new McrItem();
+    this.selectedMcrItem = new McrItem();
 
-    this.currentMcrItem.Name = 'Item Name';
-    this.currentMcrItem.Comment = 'Item Default Comment';
+    window['CefSharp'].BindObjectAsync("pluginProxy");
 
-    if (this.currentMcrItem.Name === 'jjj') {
-      this.selectedItemUpdated();
-    }
+    //window['CefSharp'].BindObjectAsync("pluginProxyAsync");
   }
 
   public selectedItemUpdated(): void {
-    this.currentMcrItem.Name = 'Fired!';
+    var proxy = window['pluginProxy'];   
+
+    this.currentMcrItem.Name =  proxy.getSelectedChannel().onAirItem.name;
+    this.cuedMcrItem.Name = proxy.getSelectedChannel().cuedItem.name;
+    this.selectedMcrItem.Name = proxy.getSelectedItem().name;
   }
 
-  public playItem(item: McrItem): boolean {
-    // let wang = window.external['Numberwang'];
-    // item.Name = `C# apps say numberwang is: ${wang}`;
+  public async playItem() {
 
-    const test: TestClass =  window['testObject'];
-    this.currentMcrItem.Name = test.prop1;
-    const result = test.method1(this.currentMcrItem.Name);
-    alert(`Count: ${result}`);
-
-    return false;
+   // var timePromise = window['pluginProxyAsync'].getTime('CefSharp');
+   // timePromise.then((val) => this.currentMcrItem.Comment = val);
+    var proxy = window['pluginProxy'];
+    
+    proxy.startCuedOnCurrentChannel();
   }
 
-  public clearItem(item: McrItem): boolean {
-    window.external['Test']('Current item name: ' + item.Name);
-
-    return false;
+  public async clearItem() {
   }
 
-  public sayHello() {
-    alert('Hello from Angular');
-  }
 }

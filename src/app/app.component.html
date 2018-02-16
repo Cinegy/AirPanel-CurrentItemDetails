@@ -4,12 +4,19 @@
 </div>
 
 <div class="engineList">    
-  <div class="groupBoxLabel">CURRENT ITEM</div>
+ <div class="groupBoxLabel">CURRENT ITEM</div>
   <div class="groupBox" ng-app="">
-    <h2 class="groupBoxLabel">Item: {{ currentMcrItem.Name }}</h2>
+    <h2 class="groupBoxLabel">{{ currentMcrItem.Name }}</h2>
+  </div>
+  <div class="groupBoxLabel">CUED ITEM</div>
+  <div class="groupBox" ng-app="">
+    <h2 class="groupBoxLabel">{{ cuedMcrItem.Name }}</h2>
+  </div>
+  <div class="groupBoxLabel">SELECTED ITEM</div>
+  <div class="groupBox" ng-app="">
+    <h2 class="groupBoxLabel">{{ selectedMcrItem.Name }}</h2>
   </div>
 </div>
-
 
 <div class="engineList">    
   <div class="groupBoxLabel">CONTROLS</div>
@@ -18,13 +25,13 @@
           <tr>
               <td>
                   <div class="buttonCaption">PLY</div>
-                  <div type="button" class="btn btn-goLive" (click)="playItem(currentMcrItem)" >
+                  <div type="button" class="btn btn-goLive" (click)="playItem()" >
                       <div class="square" style="background: black"></div>
                   </div>
               </td>
               <td>
                   <div class="buttonCaption buttonCaption-clearAll">CLR</div>
-                  <div type="button" class="btn btn-select" (click)="clearItem(currentMcrItem)">
+                  <div type="button" class="btn btn-select" (click)="clearItem()">
                       <div class="square" style="background: black"></div>
                   </div>
               </td>

@@ -1,0 +1,28 @@
+environment:
+  matrix:
+    - nodejs_version: "8"
+
+matrix:
+  fast_finish: true
+
+install:
+  - ps: Install-Product node $env:nodejs_version
+  - npm install -g npm@~5.6.0
+  - npm install
+  - choco install googlechrome
+
+test_script:
+  - node --version
+  - npm --version
+
+build_script:
+  - npm run-script build
+
+cache:
+  - node_modules -> package-lock.json
+
+after_build:
+- cmd: >-
+    7z a AirPlugin-CurrentItemDetails-%APPVEYOR_REPO_BRANCH%-%APPVEYOR_BUILD_VERSION%.zip %APPVEYOR_BUILD_FOLDER%\dist\*.*
+
+    appveyor PushArtifact AirPlugin-CurrentItemDetails-%APPVEYOR_REPO_BRANCH%-%APPVEYOR_BUILD_VERSION%.zip
