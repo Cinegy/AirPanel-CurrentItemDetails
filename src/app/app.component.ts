@@ -15,6 +15,7 @@ export class AppComponent {
   public currentMcrItem: McrItem;
   public cuedMcrItem: McrItem;
   public selectedMcrItem: McrItem;
+  private proxy;
 
   constructor(private zone: NgZone) {
     window['angularComponentRef'] = {
@@ -28,29 +29,47 @@ export class AppComponent {
     this.cuedMcrItem = new McrItem();
     this.selectedMcrItem = new McrItem();
 
-    window['CefSharp'].BindObjectAsync("pluginProxy");
-
-    //window['CefSharp'].BindObjectAsync("pluginProxyAsync");
+    this.initBinding();
   }
 
-  public selectedItemUpdated(): void {
-    var proxy = window['pluginProxy'];   
-
-    this.currentMcrItem.Name =  proxy.getSelectedChannel().onAirItem.name;
-    this.cuedMcrItem.Name = proxy.getSelectedChannel().cuedItem.name;
-    this.selectedMcrItem.Name = proxy.getSelectedItem().name;
+  public async initBinding() {
+    await window['CefSharp'].BindObjectAsync('pluginProxy')
+      .then(result => {
+        if (result.Success) {
+          this.proxy = window['pluginProxy'];
+        }
+      });
   }
 
-  public async playItem() {
-
-   // var timePromise = window['pluginProxyAsync'].getTime('CefSharp');
-   // timePromise.then((val) => this.currentMcrItem.Comment = val);
-    var proxy = window['pluginProxy'];
-    
-    proxy.startCuedOnCurrentChannel();
+  public selectedItemUpdated() {
+    console.log('Update');
+    this.proxy.getSelectedChannelAsync()
+      .then(res => {
+        const channel = JSON.parse(res);
+        this.currentMcrItem.name = channel.OnAirItem.Name;
+        this.cuedMcrItem.name = channel.CuedItem.Name;
+        this.selectedMcrItem.name = channel.Name;
+      })
+      .catch(error => {
+        console.log(error);
+      });
   }
 
-  public async clearItem() {
+  public playItem() {
+    console.log('Play Item');
+
+    this.proxy.startCuedOnCurrentChannel()
+      .then(() => {
+        console.log('Success');
+      })
+      .catch(error => {
+        console.log(error);
+      });
+
+  }
+
+  public clearItem() {
+    console.log('Clear Item');
   }
 
 }
