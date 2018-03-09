@@ -16,6 +16,9 @@ export class AppComponent {
   public cuedMcrItem: McrItem;
   public selectedMcrItem: McrItem;
   private proxy;
+  private proxyAsync;
+  private selectedChannelAsync;
+  private selectedItemAsync;
 
   constructor(private zone: NgZone) {
     window['angularComponentRef'] = {
@@ -33,26 +36,62 @@ export class AppComponent {
   }
 
   public async initBinding() {
-    await window['CefSharp'].BindObjectAsync('pluginProxy')
+    await window['CefSharp'].BindObjectAsync('pluginProxyAsync')
       .then(result => {
         if (result.Success) {
-          this.proxy = window['pluginProxy'];
+          this.proxyAsync = window['pluginProxyAsync'];
         }
-      });
-  }
-
-  public selectedItemUpdated() {
-    console.log('Update');
-    this.proxy.getSelectedChannelAsync()
-      .then(res => {
-        const channel = JSON.parse(res);
-        this.currentMcrItem.name = channel.OnAirItem.Name;
-        this.cuedMcrItem.name = channel.CuedItem.Name;
-        this.selectedMcrItem.name = channel.Name;
       })
       .catch(error => {
         console.log(error);
       });
+
+    // await window['CefSharp'].BindObjectAsync('pluginProxy')
+    //   .then(result => {
+    //     if (result.Success) {
+    //       this.proxy = window['pluginProxy'];
+    //     }
+    //   })
+    //   .catch(error => {
+    //     console.log(error);
+    //   });
+
+    await window['CefSharp'].BindObjectAsync('selectedChannel')
+      .then(result => {
+        if (result.Success) {
+          this.selectedChannelAsync = window['selectedChannel'];
+        }
+      })
+      .catch(error => {
+        console.log(error);
+      });
+
+  }
+
+  public selectedItemUpdated() {
+    console.log(new Date().toLocaleString() + ': selectedItemUpdated');
+
+    // this.proxyAsync.getSelectedChannelJson()
+    //   .then(res => {
+    //     const channel = JSON.parse(res);
+    //     this.currentMcrItem.name = channel.OnAirItem.Name;
+    //     this.cuedMcrItem.name = channel.CuedItem.Name;
+    //     //alert(JSON.parse(channel.GetProgramsJson));
+    //   })
+    //   .catch(error => {
+    //     console.log(error);
+    //   });
+
+    this.proxyAsync.getSelectedItem()
+      .then(res => {
+        this.selectedMcrItem.name = res.Name;
+      })
+      .catch(error => {
+        console.log(error);
+      }); 
+   
+
+    
   }
 
   public playItem() {
@@ -69,7 +108,60 @@ export class AppComponent {
   }
 
   public clearItem() {
-    console.log('Clear Item');
+    console.log(new Date().toLocaleString() + ': clearItem');
+    
+    this.selectedChannelAsync.getPrograms()
+    .then(res => {
+      //const item = JSON.parse(res);
+      this.selectedMcrItem.name = res;
+    })
+    .catch(error => {
+      console.log(error);
+    }); 
+  }
+
+  public testItemClick() {
+    console.log(new Date().toLocaleString() + ': testItemClick');
+    
+    if(this.selectedItemAsync == null)
+    {
+      window['CefSharp'].BindObjectAsync('selectedItem')
+      .then(result => {
+        if (result.Success) {
+          this.selectedItemAsync = window['selectedItem'];
+          this.updateName();
+        }
+      })
+      .catch(error => {
+        console.log(error);
+      });
+    }
+    else
+    {
+      this.updateName();
+    }      
+
+   
+  }
+
+  private updateName()
+  {
+    if(this.selectedItemAsync == null)
+    {
+      console.log("Why is this null!!??");
+      return;
+    }
+
+    this.selectedItemAsync.getName()
+    .then(res => {
+      //const item = JSON.parse(res);
+      this.selectedMcrItem.name = res;
+      var delObj = window['CefSharp'].DeleteBoundObject('selectedItem');
+      this.selectedItemAsync = null;
+    })
+    .catch(error => {
+      console.log(error);
+    }); 
   }
 
 }
